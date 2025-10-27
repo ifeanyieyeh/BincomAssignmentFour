@@ -1,3 +1,62 @@
-<publishData><publishProfile profileName="BincomFourthAssignment - Web Deploy" publishMethod="MSDeploy" publishUrl="bincomfourthassignment-eef2audxademdmgd.scm.canadacentral-01.azurewebsites.net:443" msdeploySite="BincomFourthAssignment" userName="$BincomFourthAssignment" userPWD="3WBTvNL3Qx5dwMMlkNfgjwHlQWElESAT08akBDy6oabWwKsc6TxRE52hc2iG" destinationAppUrl="https://bincomfourthassignment-eef2audxademdmgd.canadacentral-01.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="BincomFourthAssignment - FTP" publishMethod="FTP" publishUrl="ftps://waws-prod-yt1-059.ftp.azurewebsites.windows.net/site/wwwroot" ftpPassiveMode="True" userName="BincomFourthAssignment\$BincomFourthAssignment" userPWD="3WBTvNL3Qx5dwMMlkNfgjwHlQWElESAT08akBDy6oabWwKsc6TxRE52hc2iG" destinationAppUrl="https://bincomfourthassignment-eef2audxademdmgd.canadacentral-01.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="BincomFourthAssignment - Zip Deploy" publishMethod="ZipDeploy" publishUrl="bincomfourthassignment-eef2audxademdmgd.scm.canadacentral-01.azurewebsites.net:443" userName="$BincomFourthAssignment" userPWD="3WBTvNL3Qx5dwMMlkNfgjwHlQWElESAT08akBDy6oabWwKsc6TxRE52hc2iG" destinationAppUrl="https://bincomfourthassignment-eef2audxademdmgd.canadacentral-01.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites"><databases /></publishProfile></publishData>
+# ------------------------------------------------------------
+# 🚀 GitHub Actions Workflow for ASP.NET Core + Azure Web App
+# ------------------------------------------------------------
+# This workflow:
+# 1️⃣ Builds your ASP.NET Core Web API
+# 2️⃣ Publishes it to Azure using your Publish Profile
+# ------------------------------------------------------------
 
-          
+name: Build and deploy ASP.Net Core app to Azure Web App - BincomFourthAssignment
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Publish project
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'BincomFourthAssignment'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BINCOMFOURTHASSIGNMENT }}
+          package: .
