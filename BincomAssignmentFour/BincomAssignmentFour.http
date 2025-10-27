@@ -1,0 +1,6 @@
+@BincomAssignmentFour_HostAddress = http://localhost:5146
+
+GET {{BincomAssignmentFour_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
